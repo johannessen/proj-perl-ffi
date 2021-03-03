@@ -1,0 +1,6 @@
+# Dist::Zilla
+/.build/
+/Geo-LibProj-FFI-*
+
+/Stuff
+proj.h
