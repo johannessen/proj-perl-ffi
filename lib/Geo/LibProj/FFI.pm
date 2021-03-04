@@ -306,7 +306,8 @@ __END__
  printf "Target: easting %.2f, northing %.2f\n",
      $b->enu->e, $b->enu->n;
 
-See also F<examples/pj_obs_api_mini_demo.pl> in this distribution.
+See also the example script F<eg/pj_obs_api_mini_demo.pl>
+in this distribution.
 
 =head1 DESCRIPTION
 
