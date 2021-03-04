@@ -1,5 +1,9 @@
 Revision history for Geo::LibProj::FFI
 
+0.0101  2021-03-04
+
+ - Resolve failures reported in CPAN Testers (GH#1 and others)
+
 0.01  2021-03-03
 
  - Release to CPAN
