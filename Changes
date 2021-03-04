@@ -1,6 +1,6 @@
 Revision history for Geo::LibProj::FFI
 
-0.0101  2021-03-04
+0.02  2021-03-04
 
  - Resolve failures reported in CPAN Testers (GH#1 and others)
 
@@ -8,4 +8,4 @@ Revision history for Geo::LibProj::FFI
 
  - Release to CPAN
  - Only a few essential functions are available, just enough
-   to support Geo::Proj5::cs2cs and a simple example
+   to support Geo::LibProj::cs2cs and a simple example

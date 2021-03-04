@@ -5,9 +5,9 @@ use warnings;
 package Geo::LibProj::FFI;
 
 
-use Alien::proj;
+use Alien::proj 1.07;
 use FFI::Platypus 1.00;
-use FFI::C;
+use FFI::C 0.08;
 
 use Exporter::Easy (TAGS => [
 	context => [qw(
@@ -42,8 +42,8 @@ use Exporter::Easy (TAGS => [
 	)],
 	const => [qw(
 		PJ_DEFAULT_CTX
-		PJ_FWD PJ_IDENT PJ_INV
 		PJ_LOG_NONE PJ_LOG_ERROR PJ_LOG_DEBUG PJ_LOG_TRACE PJ_LOG_TELL
+		PJ_FWD PJ_IDENT PJ_INV
 	)],
 	all => [qw(
 		:context
