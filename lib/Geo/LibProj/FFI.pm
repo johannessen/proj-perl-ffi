@@ -167,8 +167,10 @@ $ffi->type('opaque' => 'PJ');  # the PJ object herself
 	# Unsurprisingly, this is kinda slow in Perl ...
 	# Ideas to maybe make it faster:
 	# - refactor to use different functions from PROJ (where possible)
+	# - ignore the union entirely; just use Record + some Perl methods
+	# - FFI::C::Union + FFI::Platypus->custom_type
 	# - FFI::Platypus::Bundle
-	# - XS
+	# - XS / Inline
 	sub as_record {
 		Geo::LibProj::FFI::PJ_COORD::Record->new( v => [@{shift->v}] );
 	}
@@ -254,6 +256,7 @@ $ffi->attach( proj_trans => ['PJ', 'PJ_DIRECTION', 'PJ_COORD'] => 'PJ_COORD', su
 });
 
 # non-standard fast method that avoids PJ_COORD unions entirely
+# (easily 4x as fast as calling proj_coord, then proj_trans)
 # (expects and returns a single point as array ref)
 $ffi->attach( [proj_trans => '_trans'] => ['PJ', 'PJ_DIRECTION', 'PJ_COORD'] => 'PJ_COORD', sub {
 	my ($sub, $pj, $dir, $coord) = @_;
