@@ -292,15 +292,15 @@ __END__
 =head1 SYNOPSIS
 
  use Geo::LibProj::FFI qw(:all);
- use Syntax::Keyword::Finally;
+ use Syntax::Keyword::Defer;
  
  my $ctx = proj_context_create()
      or die "Cannot create threading context";
- FINALLY { proj_context_destroy($ctx); }
+ defer { proj_context_destroy($ctx); }
  
  my $pj = proj_create_crs_to_crs($ctx, "EPSG:25833", "EPSG:2198", undef)
      or die "Cannot create proj";
- FINALLY { proj_destroy($pj); }
+ defer { proj_destroy($pj); }
  
  ($easting, $northing) = ( 500_000, 6094_800 );
  $a = proj_coord( $easting, $northing, 0, 'Inf' );
@@ -419,7 +419,7 @@ Import all functions and constants by using the tag C<:all>.
 
 =head1 BUGS AND LIMITATIONS
 
-PROJ makes heavy using of C C<union> pass-by-value, which is
+PROJ makes heavy use of C C<union> pass-by-value, which is
 unsupported by L<FFI::Platypus>. I've found a workaround, but
 it's relatively slow. Any code that receives or passes
 C<PJ_COORD> values from or to PROJ functions is affected.
