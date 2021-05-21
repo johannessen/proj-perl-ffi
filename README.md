@@ -8,10 +8,7 @@ able to use those C functions as if they were Perl.
 
 This software is currently incomplete.
 
-It is also currently a bit skimpy on testing, because I'm not
-yet convinced that an FFI using Platypus even makes sense here
-– given the PJ_COORD problems, resulting performance issues etc.
-Plus, the C API has little to do with idiomatic Perl. So this
+The C API has little to do with idiomatic Perl. So this
 software is maybe most useful to gain familiarity with the
 PROJ API, so that we can perhaps one day have a new module
 using a different name that gives us what we *really* need.

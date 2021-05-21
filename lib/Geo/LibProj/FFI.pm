@@ -106,83 +106,117 @@ $ffi->type('opaque' => 'PJ');  # the PJ object herself
 # Geodetic, mostly spatiotemporal coordinate types
 {
 	package Geo::LibProj::FFI::PJ_XYZT;
-	FFI::C->struct('PJ_XYZT' => [ 'x' => 'double', 'y' => 'double', 'z' => 'double', 't' => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ x y z t }) }
 	package Geo::LibProj::FFI::PJ_UVWT;
-	FFI::C->struct('PJ_UVWT' => [ u => 'double', v => 'double', w => 'double', t => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ u v w t })->uvwt }
 	package Geo::LibProj::FFI::PJ_LPZT;
-	FFI::C->struct('PJ_LPZT' => [ lam => 'double', phi => 'double', z => 'double', t => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ lam phi z t }) }
 	package Geo::LibProj::FFI::PJ_OPK;
-	FFI::C->struct('PJ_OPK' => [ o => 'double', p => 'double', k => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ o p k 0 }) }
 	# Rotations: omega, phi, kappa
 	package Geo::LibProj::FFI::PJ_ENU;
-	FFI::C->struct('PJ_ENU' => [ e => 'double', n => 'double', u => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ e n u 0 }) }
 	# East, North, Up
 	package Geo::LibProj::FFI::PJ_GEOD;
-	FFI::C->struct('PJ_GEOD' => [ 's' => 'double', 'a1' => 'double', 'a2' => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ s a1 a2 0 }) }
 	# Geodesic length, fwd azi, rev azi
 }
 
 # Classic proj.4 pair/triplet types - moved into the PJ_ name space
 {
 	package Geo::LibProj::FFI::PJ_UV;
-	FFI::C->struct('PJ_UV' => [ u => 'double', v => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ u v 0 0 })->uv }
 	package Geo::LibProj::FFI::PJ_XY;
-	FFI::C->struct('PJ_XY' => [ 'x' => 'double', 'y' => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ x y 0 0 }) }
 	package Geo::LibProj::FFI::PJ_LP;
-	FFI::C->struct('PJ_LP' => [ lam => 'double', phi => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ lam phi 0 0 }) }
 	
 	package Geo::LibProj::FFI::PJ_XYZ;
-	FFI::C->struct('PJ_XYZ' => [ 'x' => 'double', 'y' => 'double', 'z' => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ x y z 0 }) }
 	package Geo::LibProj::FFI::PJ_UVW;
-	FFI::C->struct('PJ_UVW' => [ u => 'double', v => 'double', w => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ u v w 0 })->uvw }
 	package Geo::LibProj::FFI::PJ_LPZ;
-	FFI::C->struct('PJ_LPZ' => [ lam => 'double', phi => 'double', z => 'double' ]);
+	sub new { Geo::LibProj::FFI::PJ_COORD->_new($_[1], qw{ lam phi z 0 }) }
 }
 
 
 # Data type for generic geodetic 3D data plus epoch information
 # Avoid preprocessor renaming and implicit type-punning: Use a union to make it explicit
 {
-	package Geo::LibProj::FFI::PJ_COORD::Union;
-	FFI::C->union('PJ_COORD_union' => [
-		v    => 'double[4]',  # First and foremost, it really is "just 4 numbers in a vector"
-		xyzt => 'PJ_XYZT',
-		uvwt => 'PJ_UVWT',
-		lpzt => 'PJ_LPZT',
-		geod => 'PJ_GEOD',
-		opk  => 'PJ_OPK',
-		enu  => 'PJ_ENU',
-		xyz  => 'PJ_XYZ',
-		uvw  => 'PJ_UVW',
-		lpz  => 'PJ_LPZ',
-		xy   => 'PJ_XY',
-		uv   => 'PJ_UV',
-		lp   => 'PJ_LP',
-		
-	]);
-	
 	# FFI::C::Union can't be passed by value due to limitations within
-	# FFI::Platypus. Workaround: Convert the Union to a Record with the
-	# same data structure as the union, then the inverse on return.
-	# Unsurprisingly, this is kinda slow in Perl ...
-	# Ideas to maybe make it faster:
-	# - refactor to use different functions from PROJ (where possible)
-	# - ignore the union entirely; just use Record + some Perl methods
-	# - FFI::C::Union + FFI::Platypus->custom_type
-	# - FFI::Platypus::Bundle
-	# - XS / Inline
-	sub as_record {
-		Geo::LibProj::FFI::PJ_COORD::Record->new( v => [@{shift->v}] );
+	# FFI::Platypus. Workaround: Use a Record with some additional Perl
+	# glue. The performance may not be perfect, but seems satisfactory.
+	
+	package Geo::LibProj::FFI::PJ_COORD;
+	use FFI::Platypus::Record;
+	record_layout_1(qw{ double x double y double z double t });
+	sub _new {
+		my ($class, $values, @params) = @_;
+		$values //= {};
+		@params = map { $values->{$_} // 0 } @params;
+		return $class->new({ 'x' => $params[0], 'y' => $params[1], 'z' => $params[2], 't' => $params[3] });
+	}
+	sub _set {
+		my ($self, $values, @params) = @_;
+		if (ref $values eq 'HASH') {
+			@params = map { $values->{$_} } @params;
+		}
+		else {
+			@params = map { eval "\$values->$_" } grep !/^0$/, @params;  ## no critic (ProhibitStringyEval)
+		}
+		$self->v(\@params);
 	}
 	
-	package Geo::LibProj::FFI::PJ_COORD::Record;
-	use FFI::Platypus::Record;
-	record_layout_1(qw{ double[4] v });
-	sub as_union {
-		Geo::LibProj::FFI::PJ_COORD::Union->new({ v => shift->v });
+	# union members:
+	sub v {  # First and foremost, it really is "just 4 numbers in a vector"
+		my ($self, $vector) = @_;
+		return [ $self->x(), $self->y(), $self->z(), $self->t() ] unless $vector;
+		$self->x($vector->[0] // 0);
+		$self->y($vector->[1] // 0);
+		$self->z($vector->[2] // 0);
+		$self->t($vector->[3] // 0);
 	}
+	sub xyzt { $_[1] ? $_[0]->_set($_[1], qw{ x   y   z  t }) : shift }
+	sub uvwt { $_[1] ? $_[0]->_set($_[1], qw{ u   v   w  t }) : Geo::LibProj::FFI::PJ_UVWT->_new(shift) }
+	sub lpzt { $_[1] ? $_[0]->_set($_[1], qw{ lam phi z  t }) : shift }
+	sub geod { $_[1] ? $_[0]->_set($_[1], qw{ s   a1  a2 0 }) : shift }
+	sub opk  { $_[1] ? $_[0]->_set($_[1], qw{ o   p   k  0 }) : shift }
+	sub enu  { $_[1] ? $_[0]->_set($_[1], qw{ e   n   u  0 }) : shift }
+	sub xyz  { $_[1] ? $_[0]->_set($_[1], qw{ x   y   z  0 }) : shift }
+	sub uvw  { $_[1] ? $_[0]->_set($_[1], qw{ u   v   w  0 }) : Geo::LibProj::FFI::PJ_UVWT->_new(shift) }
+	sub lpz  { $_[1] ? $_[0]->_set($_[1], qw{ lam phi z  0 }) : shift }
+	sub xy   { $_[1] ? $_[0]->_set($_[1], qw{ x   y   0  0 }) : shift }
+	sub uv   { $_[1] ? $_[0]->_set($_[1], qw{ u   v   0  0 }) : Geo::LibProj::FFI::PJ_UVWT->_new(shift) }
+	sub lp   { $_[1] ? $_[0]->_set($_[1], qw{ lam phi 0  0 }) : shift }
+	
+	# struct members:
+	# PJ_UV* need their own package due to name collisions.
+	# The other types are implemented by the PJ_COORD package.
+	
+	sub lam { shift->x( @_ ) }
+	sub o   { shift->x( @_ ) }
+	sub e   { shift->x( @_ ) }
+	sub s   { shift->x( @_ ) }
+	
+	sub phi { shift->y( @_ ) }
+	sub p   { shift->y( @_ ) }
+	sub n   { shift->y( @_ ) }
+	sub a1  { shift->y( @_ ) }
+	
+	sub k   { shift->z( @_ ) }
+	sub u   { shift->z( @_ ) }
+	sub a2  { shift->z( @_ ) }
+	
+	package Geo::LibProj::FFI::PJ_UVWT;
+	use parent -norequire => 'Geo::LibProj::FFI::PJ_COORD';
+	sub _new { bless \$_[1], $_[0] }
+	sub u { ${shift()}->x( @_ ) }
+	sub v { ${shift()}->y( @_ ) }
+	sub w { ${shift()}->z( @_ ) }
+	sub t { ${shift()}->t( @_ ) }
+	
 }
-$ffi->type('record(Geo::LibProj::FFI::PJ_COORD::Record)' => 'PJ_COORD');
+$ffi->type('record(Geo::LibProj::FFI::PJ_COORD)' => 'PJ_COORD');
 
 
 {
@@ -250,26 +284,18 @@ FFI::C->enum('PJ_DIRECTION', [
 ]);
 
 
-$ffi->attach( proj_trans => ['PJ', 'PJ_DIRECTION', 'PJ_COORD'] => 'PJ_COORD', sub {
-	my ($sub, $pj, $dir, $coord) = @_;
-	$sub->( $pj, $dir, $coord->as_record )->as_union;
-});
+$ffi->attach( proj_trans => ['PJ', 'PJ_DIRECTION', 'PJ_COORD'] => 'PJ_COORD');
 
-# non-standard fast method that avoids PJ_COORD unions entirely
-# (easily 4x as fast as calling proj_coord, then proj_trans)
+# non-standard method (now discouraged; originally used by Perl cs2cs)
 # (expects and returns a single point as array ref)
 $ffi->attach( [proj_trans => '_trans'] => ['PJ', 'PJ_DIRECTION', 'PJ_COORD'] => 'PJ_COORD', sub {
 	my ($sub, $pj, $dir, $coord) = @_;
-	$coord = Geo::LibProj::FFI::PJ_COORD::Record->new( v => $coord );
-	$sub->( $pj, $dir, $coord )->v;
+	$sub->( $pj, $dir, proj_coord($coord->[0] // 0, $coord->[1] // 0, $coord->[2] // 0, $coord->[3] // 0) )->v;
 });
 
 
 # Initializers
-$ffi->attach( proj_coord => [qw( double double double double )] => 'PJ_COORD', sub {
-	my $sub = shift;
-	$sub->(@_)->as_union;
-});
+$ffi->attach( proj_coord => [qw( double double double double )] => 'PJ_COORD');
 
 # Set or read error level
 $ffi->attach( proj_context_errno => ['PJ_CONTEXT'] => 'int');
@@ -417,18 +443,53 @@ Import all functions and constants by using the tag C<:all>.
 
 =back
 
+=head1 DATA TYPES
+
+The PROJ library uses numerous composite data types. When
+working with L<Geo::LibProj::FFI>, members of S<C C<struct>>
+and C<union> types may be accessed B<for reading> by calling
+methods on these composites. For example, to output the
+S<X coordinate> of a C<PJ_COORD> value, you could simply
+do C<< print $coord->xyz->x(); >>. Please see the
+L<PROJ data type reference|https://proj.org/development/reference/datatypes.html>
+for further documentation.
+
+As of version 0.02 of this module, the interface I<for modifying>
+values of composite types from Perl is still evolving. Therefore,
+values of S<C C<struct>> and C<union> types are best treated as
+B<immutable> by Perl users. For the same reason, it is not
+recommended to try and create new values of such types using Perl
+constructors; instead, users should use PROJ functions to create
+such values wherever possible.
+
+That said, it is already now fully I<possible> to modify such
+values and to construct them using C<new()>; it's just not yet
+I<recommended> to do so. Consider this code example to create
+and modify a C<PJ_COORD> value:
+
+ # discouraged:
+ # (not guaranteed to work in future versions)
+ $coord = Geo::LibProj::FFI::PJ_COORD->new({
+     xy => { x => 12, y => 34 }
+ });
+ $coord->xyz->z( 100 );
+ 
+ # recommended:
+ $coord = proj_coord( 12, 34, 0, 0 );
+ $vector = $coord->v;
+ $vector->[2] = 100;
+ $coord = proj_coord( @$vector );
+
 =head1 BUGS AND LIMITATIONS
 
-PROJ makes heavy use of C C<union> pass-by-value, which is
-unsupported by L<FFI::Platypus>. I've found a workaround, but
-it's relatively slow. Any code that receives or passes
-C<PJ_COORD> values from or to PROJ functions is affected.
-It should be possible to improve this though. Somehow.
+PROJ makes heavy use of S<C C<union>> pass-by-value, which is
+unsupported by L<FFI::Platypus>. In earlier versions of this module,
+the workaround for working with C<PJ_COORD> values was quite slow.
+This performance issue has been addressed as of S<version 0.03.>
 
 Some implementation details of the glue this module provides
 may change in future, for example to better match the API or to
-increase performance. The C<PJ_COORD> type (incl. C<PJ_XY> etc.)
-in particular may be considered unstable. Should you decide to
+increase performance. Should you decide to
 use this module in production, it would be wise to watch the
 L<GitHub project|https://github.com/johannessen/proj-perl-ffi>
 for changes, at least until the version has reached 1.00.

@@ -23,7 +23,7 @@ my ($a, $b, $c, $d, $v, $union, $struct);
 ($a, $b, $c, $d) = (12.5, -34.5, 67.5, -89.5);
 
 subtest 'PJ_LP new' => sub {
-	plan tests => 2 * (1 + 2) + 2;
+	plan tests => 2*3 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_LP->new(); } 'empty';
 	lives_and { is $struct->lam(), 0 } 'lam empty';
 	lives_and { is $struct->phi(), 0 } 'phi empty';
@@ -31,12 +31,14 @@ subtest 'PJ_LP new' => sub {
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_LP->new({ lam => $a, phi => $b }); } 'new';
 	lives_and { is $struct->lam(), $a } 'lam';
 	lives_and { is $struct->phi(), $b } 'phi';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ lp => $lp }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ lp => $lp }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, 0, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ lp => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, 0, 0] } 'union struct array';
 };
 
 subtest 'PJ_XY new' => sub {
-	plan tests => 2 * (1 + 2) + 2;
+	plan tests => 2*3 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_XY->new(); } 'new empty';
 	is eval '$struct->x', 0, 'x empty';
 	is eval '$struct->y', 0, 'y empty';
@@ -44,12 +46,14 @@ subtest 'PJ_XY new' => sub {
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_XY->new( $xy ); } 'new';
 	is eval '$struct->x', $a, 'x';
 	is eval '$struct->y', $b, 'y';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ xy => $xy }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ xy => $xy }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, 0, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ xy => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, 0, 0] } 'union struct array';
 };
 
 subtest 'PJ_UV new' => sub {
-	plan tests => 2 * (1 + 2) + 2;
+	plan tests => 2*3 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_UV->new(); } 'new empty';
 	lives_and { is $struct->u(), 0 } 'u empty';
 	lives_and { is $struct->v(), 0 } 'v empty';
@@ -57,12 +61,14 @@ subtest 'PJ_UV new' => sub {
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_UV->new( $uv ); } 'new';
 	lives_and { is $struct->u(), $a } 'u';
 	lives_and { is $struct->v(), $b } 'v';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ uv => $uv }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ uv => $uv }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, 0, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ uv => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, 0, 0] } 'union struct array';
 };
 
 subtest 'PJ_LPZ new' => sub {
-	plan tests => 2 * (1 + 3) + 2;
+	plan tests => 2*4 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_LPZ->new(); } 'new empty';
 	lives_and { is $struct->lam(), 0 } 'lam empty';
 	lives_and { is $struct->phi(), 0 } 'phi empty';
@@ -72,12 +78,14 @@ subtest 'PJ_LPZ new' => sub {
 	lives_and { is $struct->lam(), $a } 'lam';
 	lives_and { is $struct->phi(), $b } 'phi';
 	lives_and { is $struct->z(), $c } 'z';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ lpz => $lpz }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ lpz => $lpz }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ lpz => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union struct array';
 };
 
 subtest 'PJ_XYZ new' => sub {
-	plan tests => 2 * (1 + 3) + 2;
+	plan tests => 2*4 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_XYZ->new(); } 'new empty';
 	is eval '$struct->x', 0, 'x empty';
 	is eval '$struct->y', 0, 'y empty';
@@ -87,12 +95,14 @@ subtest 'PJ_XYZ new' => sub {
 	is eval '$struct->x', $a, 'x';
 	is eval '$struct->y', $b, 'y';
 	is eval '$struct->z', $c, 'z';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ xyz => $xyz }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ xyz => $xyz }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ xyz => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union struct array';
 };
 
 subtest 'PJ_UVW new' => sub {
-	plan tests => 2 * (1 + 3) + 2;
+	plan tests => 2*4 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_UVW->new(); } 'new empty';
 	lives_and { is $struct->u(), 0 } 'u empty';
 	lives_and { is $struct->v(), 0 } 'v empty';
@@ -102,12 +112,14 @@ subtest 'PJ_UVW new' => sub {
 	lives_and { is $struct->u(), $a } 'u';
 	lives_and { is $struct->v(), $b } 'v';
 	lives_and { is $struct->w(), $c } 'w';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ uvw => $uvw }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ uvw => $uvw }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ uvw => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union struct array';
 };
 
 subtest 'PJ_LPZT new' => sub {
-	plan tests => 2 * (1 + 4) + 2;
+	plan tests => 2*5 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_LPZT->new(); } 'new empty';
 	lives_and { is $struct->lam(), 0 } 'lam empty';
 	lives_and { is $struct->phi(), 0 } 'phi empty';
@@ -119,12 +131,14 @@ subtest 'PJ_LPZT new' => sub {
 	lives_and { is $struct->phi(), $b } 'phi';
 	lives_and { is $struct->z(), $c } 'z';
 	lives_and { is $struct->t(), $d } 't';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ lpzt => $lpzt }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ lpzt => $lpzt }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, $d] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ lpzt => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, $d] } 'union struct array';
 };
 
 subtest 'PJ_XYZT new' => sub {
-	plan tests => 2 * (1 + 4) + 2;
+	plan tests => 2*5 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_XYZT->new(); } 'new empty';
 	is eval '$struct->x', 0, 'x empty';
 	is eval '$struct->y', 0, 'y empty';
@@ -136,12 +150,14 @@ subtest 'PJ_XYZT new' => sub {
 	is eval '$struct->y', $b, 'y';
 	is eval '$struct->z', $c, 'z';
 	is eval '$struct->t', $d, 't';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ xyzt => $xyzt }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ xyzt => $xyzt }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, $d] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ xyzt => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, $d] } 'union struct array';
 };
 
 subtest 'PJ_UVWT new' => sub {
-	plan tests => 2 * (1 + 4) + 2;
+	plan tests => 2*5 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_UVWT->new(); } 'new empty';
 	lives_and { is $struct->u(), 0 } 'u empty';
 	lives_and { is $struct->v(), 0 } 'v empty';
@@ -153,12 +169,14 @@ subtest 'PJ_UVWT new' => sub {
 	lives_and { is $struct->v(), $b } 'v';
 	lives_and { is $struct->w(), $c } 'w';
 	lives_and { is $struct->t(), $d } 't';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ uvwt => $uvwt }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ uvwt => $uvwt }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, $d] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ uvwt => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, $d] } 'union struct array';
 };
 
 subtest 'PJ_OPK new' => sub {
-	plan tests => 2 * (1 + 3) + 2;
+	plan tests => 2*4 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_OPK->new(); } 'new empty';
 	lives_and { is $struct->o(), 0 } 'o empty';
 	lives_and { is $struct->p(), 0 } 'p empty';
@@ -168,12 +186,14 @@ subtest 'PJ_OPK new' => sub {
 	lives_and { is $struct->o(), $a } 'o';
 	lives_and { is $struct->p(), $b } 'p';
 	lives_and { is $struct->k(), $c } 'k';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ opk => $opk }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ opk => $opk }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ opk => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union struct array';
 };
 
 subtest 'PJ_ENU new' => sub {
-	plan tests => 2 * (1 + 3) + 2;
+	plan tests => 2*4 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_ENU->new(); } 'new empty';
 	lives_and { is $struct->e(), 0 } 'e empty';
 	lives_and { is $struct->n(), 0 } 'n empty';
@@ -183,12 +203,14 @@ subtest 'PJ_ENU new' => sub {
 	lives_and { is $struct->e(), $a } 'e';
 	lives_and { is $struct->n(), $b } 'n';
 	lives_and { is $struct->u(), $c } 'u';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ enu => $enu }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ enu => $enu }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ enu => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union struct array';
 };
 
 subtest 'PJ_GEOD new' => sub {
-	plan tests => 2 * (1 + 3) + 2;
+	plan tests => 2*4 + 4;
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_GEOD->new(); } 'new empty';
 	is eval '$struct->s', 0, 's empty';
 	is eval '$struct->a1', 0, 'a1 empty';
@@ -198,15 +220,19 @@ subtest 'PJ_GEOD new' => sub {
 	is eval '$struct->s', $a, 's';
 	is eval '$struct->a1', $b, 'a1';
 	is eval '$struct->a2', $c, 'a2';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ geod => $geod }) } 'new union';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ geod => $geod }) } 'new union';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ geod => $struct }) } 'new union struct';
+	lives_and { is_deeply $union->v(), [$a, $b, $c, 0] } 'union struct array';
 };
 
 subtest 'PJ_COORD new v' => sub {
-	plan tests => 4;
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new() } 'new empty';
+	plan tests => 6;
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new() } 'new empty';
 	is_deeply $union->v(), [0, 0, 0, 0], 'v empty';
-	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD::Union->new({ v => [$a, $b, $c, $d] }) } 'new';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ v => [] }) } 'new empty array';
+	is_deeply $union->v(), [0, 0, 0, 0], 'v empty array';
+	lives_ok { $union = 0; $union = Geo::LibProj::FFI::PJ_COORD->new({ v => [$a, $b, $c, $d] }) } 'new';
 	lives_and { is_deeply $union->v(), [$a, $b, $c, $d] } 'v array';
 	$union = proj_coord($a, $b, $c, $d) if ! $union;
 };
