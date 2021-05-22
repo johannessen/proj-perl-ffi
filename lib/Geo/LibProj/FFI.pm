@@ -33,6 +33,10 @@ use Exporter::Easy (TAGS => [
 	)],
 	error => [qw(
 		proj_context_errno
+		proj_errno
+		proj_errno_set
+		proj_errno_reset
+		proj_errno_restore
 		proj_errno_string
 		proj_context_errno_string
 	)],
@@ -332,6 +336,10 @@ $ffi->attach( proj_geod => [qw( PJ PJ_COORD PJ_COORD )] => 'PJ_COORD');
 
 # Set or read error level
 $ffi->attach( proj_context_errno => ['PJ_CONTEXT'] => 'int');
+$ffi->attach( proj_errno => ['PJ_CONTEXT'] => 'int');
+$ffi->attach( proj_errno_set => ['PJ_CONTEXT', 'int'] => 'int');
+$ffi->attach( proj_errno_reset => ['PJ_CONTEXT'] => 'int');
+$ffi->attach( proj_errno_restore => ['PJ_CONTEXT', 'int'] => 'int');
 $ffi->attach( proj_errno_string => ['int'] => 'string');  # deprecated. use proj_context_errno_string()
 eval { $ffi->attach( proj_context_errno_string => ['PJ_CONTEXT', 'int'] => 'string'); 1 }
 	or do { *proj_context_errno_string = sub { proj_errno_string($_[1]); } };
@@ -447,6 +455,14 @@ Import all functions and constants by using the tag C<:all>.
 =over
 
 =item * C<proj_context_errno>
+
+=item * C<proj_errno>
+
+=item * C<proj_errno_set>
+
+=item * C<proj_errno_reset>
+
+=item * C<proj_errno_restore>
 
 =item * C<proj_errno_string>
 
