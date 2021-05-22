@@ -42,6 +42,13 @@ use Exporter::Easy (TAGS => [
 	info => [qw(
 		proj_info
 	)],
+	distance => [qw(
+		proj_lp_dist
+		proj_lpz_dist
+		proj_xy_dist
+		proj_xyz_dist
+		proj_geod
+	)],
 	misc => [qw(
 		proj_coord
 	)],
@@ -58,6 +65,7 @@ use Exporter::Easy (TAGS => [
 		:error
 		:logging
 		:info
+		:distance
 		:misc
 		:const
 		proj_cleanup
@@ -307,6 +315,21 @@ $ffi->attach( [proj_trans => '_trans'] => ['PJ', 'PJ_DIRECTION', 'PJ_COORD'] => 
 # Initializers
 $ffi->attach( proj_coord => [qw( double double double double )] => 'PJ_COORD');
 
+# Geodesic distance between two points with angular 2D coordinates
+$ffi->attach( proj_lp_dist => [qw( PJ PJ_COORD PJ_COORD )] => 'double');
+
+# The geodesic distance AND the vertical offset
+$ffi->attach( proj_lpz_dist => [qw( PJ PJ_COORD PJ_COORD )] => 'double');
+
+# Euclidean distance between two points with linear 2D coordinates
+$ffi->attach( proj_xy_dist => [qw( PJ_COORD PJ_COORD )] => 'double');
+
+# Euclidean distance between two points with linear 3D coordinates
+$ffi->attach( proj_xyz_dist => [qw( PJ_COORD PJ_COORD )] => 'double');
+
+# Geodesic distance (in meter) + fwd and rev azimuth between two points on the ellipsoid
+$ffi->attach( proj_geod => [qw( PJ PJ_COORD PJ_COORD )] => 'PJ_COORD');
+
 # Set or read error level
 $ffi->attach( proj_context_errno => ['PJ_CONTEXT'] => 'int');
 $ffi->attach( proj_errno_string => ['int'] => 'string');  # deprecated. use proj_context_errno_string()
@@ -444,6 +467,22 @@ Import all functions and constants by using the tag C<:all>.
 =over
 
 =item * C<proj_info>
+
+=back
+
+=item L<Distances|https://proj.org/development/reference/functions.html#distances>
+
+=over
+
+=item * C<proj_lp_dist>
+
+=item * C<proj_lpz_dist>
+
+=item * C<proj_xy_dist>
+
+=item * C<proj_xyz_dist>
+
+=item * C<proj_geod>
 
 =back
 
