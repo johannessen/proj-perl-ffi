@@ -1,5 +1,9 @@
 Revision history for Geo::LibProj::FFI
 
+0.0301  2021-05-22
+
+ - Add area of interest functions
+
 0.03  2021-05-21
 
  - Address performance issues with PJ_COORD values

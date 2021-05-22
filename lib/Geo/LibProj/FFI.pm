@@ -23,6 +23,11 @@ use Exporter::Easy (TAGS => [
 		proj_normalize_for_visualization
 		proj_destroy
 	)],
+	area => [qw(
+		proj_area_create
+		proj_area_set_bbox
+		proj_area_destroy
+	)],
 	transform => [qw(
 		proj_trans
 	)],
@@ -48,6 +53,7 @@ use Exporter::Easy (TAGS => [
 	all => [qw(
 		:context
 		:setup
+		:area
 		:transform
 		:error
 		:logging
@@ -276,6 +282,10 @@ $ffi->attach( proj_normalize_for_visualization => ['PJ_CONTEXT', 'PJ'] => 'PJ');
 $ffi->attach( proj_destroy => ['PJ'] => 'void');
 
 
+$ffi->attach( proj_area_create => [] => 'PJ_AREA');
+$ffi->attach( proj_area_set_bbox => [qw( PJ_AREA double double double double )] => 'void');
+$ffi->attach( proj_area_destroy => [qw( PJ_AREA )] => 'void');
+
 # Apply transformation to observation - in forward or inverse direction
 FFI::C->enum('PJ_DIRECTION', [
 	[PJ_FWD   =>  1],  # Forward
@@ -386,6 +396,18 @@ Import all functions and constants by using the tag C<:all>.
 =item * C<proj_normalize_for_visualization>
 
 =item * C<proj_destroy>
+
+=back
+
+=item L<Area of interest|https://proj.org/development/reference/functions.html#area-of-interest>
+
+=over
+
+=item * C<proj_area_create>
+
+=item * C<proj_area_set_bbox>
+
+=item * C<proj_area_destroy>
 
 =back
 
