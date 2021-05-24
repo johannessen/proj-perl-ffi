@@ -1,11 +1,12 @@
 Revision history for Geo::LibProj::FFI
 
-0.0304  2021-05-24
+0.0305  2021-05-24
 
  - Add area of interest functions
  - Add distances functions
  - Add error-state manipulation functions
  - Add info functions
+ - Add lists functions
 
 0.03  2021-05-21
 

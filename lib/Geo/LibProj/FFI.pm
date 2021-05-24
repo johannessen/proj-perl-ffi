@@ -8,6 +8,7 @@ package Geo::LibProj::FFI;
 use Alien::proj 1.07;
 use FFI::Platypus 1.00;
 use FFI::C 0.08;
+use Convert::Binary::C 0.04;
 
 use Exporter::Easy (TAGS => [
 	context => [qw(
@@ -49,6 +50,13 @@ use Exporter::Easy (TAGS => [
 		proj_grid_info
 		proj_init_info
 	)],
+	lists => [qw(
+		proj_list_operations
+		proj_list_ellps
+		proj_list_units
+		proj_list_angular_units
+		proj_list_prime_meridians
+	)],
 	distance => [qw(
 		proj_lp_dist
 		proj_lpz_dist
@@ -72,6 +80,7 @@ use Exporter::Easy (TAGS => [
 		:error
 		:logging
 		:info
+		:lists
 		:distance
 		:misc
 		:const
@@ -86,6 +95,10 @@ my $ffi = FFI::Platypus->new(
 );
 FFI::C->ffi($ffi);
 
+my $c = Convert::Binary::C->new;
+
+$ffi->load_custom_type('::StringPointer' => 'string_pointer');
+# string* should also work, but doesn't in $ffi->cast
 $ffi->load_custom_type('::StringArray' => 'string_array');
 # string[] should also work, but causes strlen in proj_create_crs_to_crs_from_pj to segfault
 
@@ -122,6 +135,80 @@ $ffi->type('opaque' => 'PJ_AREA');
 
 # Data type for projection/transformation information
 $ffi->type('opaque' => 'PJ');  # the PJ object herself
+
+# Data types for list of operations, ellipsoids, datums and units used in PROJ.4
+$c->parse(<<ENDC);
+struct PJ_LIST {
+	const char  *id;                /* projection keyword */
+	void        *(*proj)(void *);   /* projection entry point */
+	const char  * const *descr;     /* description text */
+};
+ENDC
+$ffi->custom_type( 'PJ_OPERATIONS' => {
+	native_to_perl => sub {
+		my ($ptr) = @_;
+		my $size = $c->sizeof('PJ_LIST');
+		my @list;
+		while () {
+			$ptr += $size;
+			my $item = $c->unpack('PJ_LIST', $ffi->cast( 'opaque' => "record($size)*", $ptr ));
+			last unless $item->{id};
+			$item->{id} = $ffi->cast( 'opaque' => 'string', $item->{id} );
+			$item->{descr} = $ffi->cast( 'opaque' => 'string_pointer', $item->{descr} );
+			push @list, $item;
+		}
+		return \@list;
+	},
+});
+
+sub _unpack_list {
+	my ($type, $ptr) = @_;
+	my $size = $c->sizeof($type);
+	my @list;
+	while () {
+		my $item = $c->unpack($type, $ffi->cast( 'opaque' => "record($size)*", $ptr ));
+		last unless $item->{id};
+		$item->{$_} = $ffi->cast( 'opaque' => 'string', $item->{$_} )
+			for grep { $c->typeof("$type.$_") eq 'char *' } keys %$item;
+		push @list, $item;
+		$ptr += $size;
+	}
+	return \@list;
+}
+
+$c->parse(<<ENDC);
+struct PJ_ELLPS {
+	const char  *id;    /* ellipse keyword name */
+	const char  *major; /* a= value */
+	const char  *ell;   /* elliptical parameter */
+	const char  *name;  /* comments */
+};
+ENDC
+$ffi->custom_type( 'PJ_ELLPS' => {
+	native_to_perl => sub { _unpack_list(PJ_ELLPS => @_) },
+});
+
+$c->parse(<<ENDC);
+struct PJ_UNITS {
+	const char  *id;        /* units keyword */
+	const char  *to_meter;  /* multiply by value to get meters */
+	const char  *name;      /* comments */
+	double      factor;     /* to_meter factor in actual numbers */
+};
+ENDC
+$ffi->custom_type( 'PJ_UNITS' => {
+	native_to_perl => sub { _unpack_list(PJ_UNITS => @_) },
+});
+
+$c->parse(<<ENDC);
+struct PJ_PRIME_MERIDIANS {
+	const char  *id;        /* prime meridian keyword */
+	const char  *defn;      /* offset from greenwich in DMS format. */
+};
+ENDC
+$ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
+	native_to_perl => sub { _unpack_list(PJ_PRIME_MERIDIANS => @_) },
+});
 
 
 # Geodetic, mostly spatiotemporal coordinate types
@@ -405,6 +492,14 @@ $ffi->attach( proj_pj_info => ['PJ'] => 'PJ_PROJ_INFO');
 $ffi->attach( proj_grid_info => ['string'] => 'PJ_GRID_INFO');
 $ffi->attach( proj_init_info => ['string'] => 'PJ_INIT_INFO');
 
+# List functions:
+# Get lists of operations, ellipsoids, units and prime meridians.
+$ffi->attach( proj_list_operations => [] => 'PJ_OPERATIONS');
+$ffi->attach( proj_list_ellps => [] => 'PJ_ELLPS');
+$ffi->attach( proj_list_units => [] => 'PJ_UNITS');
+$ffi->attach( proj_list_angular_units => [] => 'PJ_UNITS');
+$ffi->attach( proj_list_prime_meridians => [] => 'PJ_PRIME_MERIDIANS');
+
 $ffi->attach( proj_cleanup => [] => 'void');
 
 1;
@@ -545,6 +640,22 @@ Import all functions and constants by using the tag C<:all>.
 =item * C<proj_grid_info>
 
 =item * C<proj_init_info>
+
+=back
+
+=item L<Lists|https://proj.org/development/reference/functions.html#lists>
+
+=over
+
+=item * C<proj_list_operations>
+
+=item * C<proj_list_ellps>
+
+=item * C<proj_list_units>
+
+=item * C<proj_list_angular_units>
+
+=item * C<proj_list_prime_meridians>
 
 =back
 
