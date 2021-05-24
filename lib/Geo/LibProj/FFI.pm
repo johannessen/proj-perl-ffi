@@ -45,6 +45,9 @@ use Exporter::Easy (TAGS => [
 	)],
 	info => [qw(
 		proj_info
+		proj_pj_info
+		proj_grid_info
+		proj_init_info
 	)],
 	distance => [qw(
 		proj_lp_dist
@@ -226,7 +229,6 @@ $ffi->type('opaque' => 'PJ');  # the PJ object herself
 	sub a2  { shift->z( @_ ) }
 	
 	package Geo::LibProj::FFI::PJ_UVWT;
-	use parent -norequire => 'Geo::LibProj::FFI::PJ_COORD';
 	sub _new { bless \$_[1], $_[0] }
 	sub u { ${shift()}->x( @_ ) }
 	sub v { ${shift()}->y( @_ ) }
@@ -255,6 +257,57 @@ $ffi->type('record(Geo::LibProj::FFI::PJ_COORD)' => 'PJ_COORD');
 	);
 }
 $ffi->type('record(Geo::LibProj::FFI::PJ_INFO)' => 'PJ_INFO');
+
+{
+	package Geo::LibProj::FFI::PJ_PROJ_INFO;
+	use FFI::Platypus::Record;
+	record_layout_1(
+		string => 'id',           # Name of the projection in question
+		string => 'description',  # Description of the projection
+		string => 'definition',   # Projection definition
+		int    => 'has_inverse',  # 1 if an inverse mapping exists, 0 otherwise
+		double => 'accuracy',     # Expected accuracy of the transformation. -1 if unknown.
+	);
+}
+$ffi->type('record(Geo::LibProj::FFI::PJ_PROJ_INFO)' => 'PJ_PROJ_INFO');
+
+{
+	package Geo::LibProj::FFI::PJ_GRID_INFO;
+	use FFI::Platypus::Record;
+	record_layout_1(
+		'string(32)'  => 'gridname_NUL',         # name of grid
+		'string(260)' => 'filename_NUL',         # full path to grid
+		'string(8)'   => 'format_NUL',           # file format of grid
+		double => 'left',   double => 'lower',   # Coordinates of lower left corner
+		double => 'right',  double => 'upper',   # Coordinates of upper right corner
+		int    => 'n_lon',  int    => 'n_lat',   # Grid size
+		double => 'cs_lon', double => 'cs_lat',  # Cell size of grid
+	);
+	sub gridname { my $s = shift->gridname_NUL; $s =~ s/\0+$//; $s }
+	sub filename { my $s = shift->filename_NUL; $s =~ s/\0+$//; $s }
+	sub format   { my $s = shift->format_NUL;   $s =~ s/\0+$//; $s }
+	sub lowerleft  { Geo::LibProj::FFI::PJ_LP->new({ lam => $_[0]->left,  phi => $_[0]->lower }) }
+	sub upperright { Geo::LibProj::FFI::PJ_LP->new({ lam => $_[0]->right, phi => $_[0]->upper }) }
+}
+$ffi->type('record(Geo::LibProj::FFI::PJ_GRID_INFO)' => 'PJ_GRID_INFO');
+
+{
+	package Geo::LibProj::FFI::PJ_INIT_INFO;
+	use FFI::Platypus::Record;
+	record_layout_1(
+		'string(32)'  => 'name_NUL',        # name of init file
+		'string(260)' => 'filename_NUL',    # full path to the init file.
+		'string(32)'  => 'version_NUL',     # version of the init file
+		'string(32)'  => 'origin_NUL',      # origin of the file, e.g. EPSG
+		'string(16)'  => 'lastupdate_NUL',  # Date of last update in YYYY-MM-DD format
+	);
+	sub name       { my $s = shift->name_NUL;       $s =~ s/\0+$//; $s }
+	sub filename   { my $s = shift->filename_NUL;   $s =~ s/\0+$//; $s }
+	sub version    { my $s = shift->version_NUL;    $s =~ s/\0+$//; $s }
+	sub origin     { my $s = shift->origin_NUL;     $s =~ s/\0+$//; $s }
+	sub lastupdate { my $s = shift->lastupdate_NUL; $s =~ s/\0+$//; $s }
+}
+$ffi->type('record(Geo::LibProj::FFI::PJ_INIT_INFO)' => 'PJ_INIT_INFO');
 
 FFI::C->enum('PJ_LOG_LEVEL', [
 	[PJ_LOG_NONE  => 0],
@@ -348,6 +401,9 @@ $ffi->attach( proj_log_level => ['PJ_CONTEXT', 'PJ_LOG_LEVEL'] => 'PJ_LOG_LEVEL'
 
 # Info functions - get information about various PROJ.4 entities
 $ffi->attach( proj_info => [] => 'PJ_INFO');
+$ffi->attach( proj_pj_info => ['PJ'] => 'PJ_PROJ_INFO');
+$ffi->attach( proj_grid_info => ['string'] => 'PJ_GRID_INFO');
+$ffi->attach( proj_init_info => ['string'] => 'PJ_INIT_INFO');
 
 $ffi->attach( proj_cleanup => [] => 'void');
 
@@ -483,6 +539,12 @@ Import all functions and constants by using the tag C<:all>.
 =over
 
 =item * C<proj_info>
+
+=item * C<proj_pj_info>
+
+=item * C<proj_grid_info>
+
+=item * C<proj_init_info>
 
 =back
 
