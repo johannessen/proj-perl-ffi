@@ -43,6 +43,7 @@ use Exporter::Easy (TAGS => [
 	)],
 	logging => [qw(
 		proj_log_level
+		proj_log_func
 	)],
 	info => [qw(
 		proj_info
@@ -485,6 +486,15 @@ eval { $ffi->attach( proj_context_errno_string => ['PJ_CONTEXT', 'int'] => 'stri
 	or do { *proj_context_errno_string = sub { proj_errno_string($_[1]); } };
 
 $ffi->attach( proj_log_level => ['PJ_CONTEXT', 'PJ_LOG_LEVEL'] => 'PJ_LOG_LEVEL');
+$ffi->attach( proj_log_func => ['PJ_CONTEXT', 'opaque', '(opaque,int,string)->void'] => 'void', sub {
+	my ($sub, $ctx, $app_data, $logf) = @_;
+	my $closure = $ffi->closure( $app_data ? sub {
+		my (undef, $level, $msg) = @_;
+		$logf->($app_data, $level, $msg);
+	} : $logf );
+	$closure->sticky;
+	$sub->($ctx, 0, $closure);
+});
 
 # Info functions - get information about various PROJ.4 entities
 $ffi->attach( proj_info => [] => 'PJ_INFO');
@@ -539,9 +549,7 @@ L<C function reference|https://proj.org/development/reference/functions.html>
 for further documentation. You should be able to use those
 S<C functions> as if they were Perl.
 
-This module is very incomplete. Version 0.01 does
-only little more than what is necessary to support
-L<Geo::LibProj::cs2cs>.
+This module is functional, but incomplete.
 
 =head1 FUNCTIONS
 
@@ -627,6 +635,8 @@ Import all functions and constants by using the tag C<:all>.
 
 =item * C<proj_log_level>
 
+=item * C<proj_log_func>
+
 =back
 
 =item L<Info functions|https://proj.org/development/reference/functions.html#info-functions>
@@ -704,7 +714,7 @@ do C<< print $coord->xyz->x(); >>. Please see the
 L<PROJ data type reference|https://proj.org/development/reference/datatypes.html>
 for further documentation.
 
-As of version 0.02 of this module, the interface I<for modifying>
+As of version 0.04 of this module, the interface I<for modifying>
 values of composite types from Perl is still evolving. Therefore,
 values of S<C C<struct>> and C<union> types are best treated as
 B<immutable> by Perl users. For the same reason, it is not
