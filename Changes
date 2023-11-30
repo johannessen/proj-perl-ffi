@@ -1,6 +1,11 @@
 Revision history for Geo::LibProj::FFI
 
-0.0453  2023-11-30
+0.0454  2023-11-30
+
+ - Add new PJ_COORD struct member accessors. Instead of calling $c->xyz->x(),
+   you can now simply call $c->xyz_x(), which is faster and more likely to
+   remain stable with future updates. The old syntax is now discouraged,
+   but there are currently no plans to remove it.
 
  - Deprecate creating PJ_COORD union member structs with new(). Unions are not
    well supported by FFI::Platypus. For best forward compatibility, creating

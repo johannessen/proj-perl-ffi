@@ -255,7 +255,15 @@ subtest 'PJ_COORD new v' => sub {
 lives_and { $struct = 0; ok $struct = $union->xyzt } 'xyzt';
 subtest 'PJ_XYZT' => sub {
 	plan skip_all => "(xyzt failed)" unless $struct;
-	plan tests => 8;
+	plan tests => 4*4;
+	is $union->xyzt_x, $a, 'xyzt_x';
+	is $union->xyzt_y, $b, 'xyzt_y';
+	is $union->xyzt_z, $c, 'xyzt_z';
+	is $union->xyzt_t, $d, 'xyzt_t';
+	lives_ok { $union->xyzt_x(++$a) } 'inc xyzt_x';
+	lives_ok { $union->xyzt_y(++$b) } 'inc xyzt_y';
+	lives_ok { $union->xyzt_z(++$c) } 'inc xyzt_z';
+	lives_ok { $union->xyzt_t(++$d) } 'inc xyzt_t';
 	is eval '$struct->x', $a, 'x';
 	is eval '$struct->y', $b, 'y';
 	is eval '$struct->z', $c, 'z';
@@ -269,7 +277,15 @@ subtest 'PJ_XYZT' => sub {
 lives_and { $struct = 0; ok $struct = $union->uvwt } 'uvwt';
 subtest 'PJ_UVWT' => sub {
 	plan skip_all => "(uvwt failed)" unless $struct;
-	plan tests => 8;
+	plan tests => 4*4;
+	is $union->uvwt_u, $a, 'uvwt_u';
+	is $union->uvwt_v, $b, 'uvwt_v';
+	is $union->uvwt_w, $c, 'uvwt_w';
+	is $union->uvwt_t, $d, 'uvwt_t';
+	lives_ok { $union->uvwt_u(++$a) } 'inc uvwt_u';
+	lives_ok { $union->uvwt_v(++$b) } 'inc uvwt_v';
+	lives_ok { $union->uvwt_w(++$c) } 'inc uvwt_w';
+	lives_ok { $union->uvwt_t(++$d) } 'inc uvwt_t';
 	lives_and { is $struct->u(), $a } 'u';
 	lives_and { is $struct->v(), $b } 'v';
 	lives_and { is $struct->w(), $c } 'w';
@@ -283,7 +299,15 @@ subtest 'PJ_UVWT' => sub {
 lives_and { $struct = 0; ok $struct = $union->lpzt } 'lpzt';
 subtest 'PJ_LPZT' => sub {
 	plan skip_all => "(lpzt failed)" unless $struct;
-	plan tests => 8;
+	plan tests => 4*4;
+	is $union->lpzt_lam, $a, 'lpzt_lam';
+	is $union->lpzt_phi, $b, 'lpzt_phi';
+	is $union->lpzt_z, $c, 'lpzt_z';
+	is $union->lpzt_t, $d, 'lpzt_t';
+	lives_ok { $union->lpzt_lam(++$a) } 'inc lpzt_lam';
+	lives_ok { $union->lpzt_phi(++$b) } 'inc lpzt_phi';
+	lives_ok { $union->lpzt_z(++$c) } 'inc lpzt_z';
+	lives_ok { $union->lpzt_t(++$d) } 'inc lpzt_t';
 	lives_and { is $struct->lam(), $a } 'lam';
 	lives_and { is $struct->phi(), $b } 'phi';
 	lives_and { is $struct->z(), $c } 'z';
@@ -297,7 +321,13 @@ subtest 'PJ_LPZT' => sub {
 lives_and { $struct = 0; ok $struct = $union->geod } 'geod';
 subtest 'PJ_GEOD' => sub {
 	plan skip_all => "(geod failed)" unless $struct;
-	plan tests => 6;
+	plan tests => 4*3;
+	is $union->geod_s, $a, 'geod_s';
+	is $union->geod_a1, $b, 'geod_a1';
+	is $union->geod_a2, $c, 'geod_a2';
+	lives_ok { $union->geod_s(++$a) } 'inc geod_s';
+	lives_ok { $union->geod_a1(++$b) } 'inc geod_a1';
+	lives_ok { $union->geod_a2(++$c) } 'inc geod_a2';
 	is eval '$struct->s', $a, 's';
 	is eval '$struct->a1', $b, 'a1';
 	is eval '$struct->a2', $c, 'a2';
@@ -309,7 +339,13 @@ subtest 'PJ_GEOD' => sub {
 lives_and { $struct = 0; ok $struct = $union->opk } 'opk';
 subtest 'PJ_OPK' => sub {
 	plan skip_all => "(opk failed)" unless $struct;
-	plan tests => 6;
+	plan tests => 4*3;
+	is $union->opk_o, $a, 'opk_o';
+	is $union->opk_p, $b, 'opk_p';
+	is $union->opk_k, $c, 'opk_k';
+	lives_ok { $union->opk_o(++$a) } 'inc opk_o';
+	lives_ok { $union->opk_p(++$b) } 'inc opk_p';
+	lives_ok { $union->opk_k(++$c) } 'inc opk_k';
 	lives_and { is $struct->o(), $a } 'o';
 	lives_and { is $struct->p(), $b } 'p';
 	lives_and { is $struct->k(), $c } 'k';
@@ -321,7 +357,13 @@ subtest 'PJ_OPK' => sub {
 lives_and { $struct = 0; ok $struct = $union->enu } 'enu';
 subtest 'PJ_ENU' => sub {
 	plan skip_all => "(enu failed)" unless $struct;
-	plan tests => 6;
+	plan tests => 4*3;
+	is $union->enu_e, $a, 'enu_e';
+	is $union->enu_n, $b, 'enu_n';
+	is $union->enu_u, $c, 'enu_u';
+	lives_ok { $union->enu_e(++$a) } 'inc enu_e';
+	lives_ok { $union->enu_n(++$b) } 'inc enu_n';
+	lives_ok { $union->enu_u(++$c) } 'inc enu_u';
 	lives_and { is $struct->e(), $a } 'e';
 	lives_and { is $struct->n(), $b } 'n';
 	lives_and { is $struct->u(), $c } 'u';
@@ -333,7 +375,13 @@ subtest 'PJ_ENU' => sub {
 lives_and { $struct = 0; ok $struct = $union->xyz } 'xyz';
 subtest 'PJ_XYZ' => sub {
 	plan skip_all => "(xyz failed)" unless $struct;
-	plan tests => 6;
+	plan tests => 4*3;
+	is $union->xyz_x, $a, 'xyz_x';
+	is $union->xyz_y, $b, 'xyz_y';
+	is $union->xyz_z, $c, 'xyz_z';
+	lives_ok { $union->xyz_x(++$a) } 'inc xyz_x';
+	lives_ok { $union->xyz_y(++$b) } 'inc xyz_y';
+	lives_ok { $union->xyz_z(++$c) } 'inc xyz_z';
 	is eval '$struct->x', $a, 'x';
 	is eval '$struct->y', $b, 'y';
 	is eval '$struct->z', $c, 'z';
@@ -345,7 +393,13 @@ subtest 'PJ_XYZ' => sub {
 lives_and { $struct = 0; ok $struct = $union->uvw } 'uvw';
 subtest 'PJ_UVW' => sub {
 	plan skip_all => "(uvw failed)" unless $struct;
-	plan tests => 6;
+	plan tests => 4*3;
+	is $union->uvw_u, $a, 'uvw_u';
+	is $union->uvw_v, $b, 'uvw_v';
+	is $union->uvw_w, $c, 'uvw_w';
+	lives_ok { $union->uvw_u(++$a) } 'inc uvw_u';
+	lives_ok { $union->uvw_v(++$b) } 'inc uvw_v';
+	lives_ok { $union->uvw_w(++$c) } 'inc uvw_w';
 	lives_and { is $struct->u(), $a } 'u';
 	lives_and { is $struct->v(), $b } 'v';
 	lives_and { is $struct->w(), $c } 'w';
@@ -357,7 +411,13 @@ subtest 'PJ_UVW' => sub {
 lives_and { $struct = 0; ok $struct = $union->lpz } 'lpz';
 subtest 'PJ_LPZ' => sub {
 	plan skip_all => "(lpz failed)" unless $struct;
-	plan tests => 6;
+	plan tests => 4*3;
+	is $union->lpz_lam, $a, 'lpz_lam';
+	is $union->lpz_phi, $b, 'lpz_phi';
+	is $union->lpz_z, $c, 'lpz_z';
+	lives_ok { $union->lpz_lam(++$a) } 'inc lpz_lam';
+	lives_ok { $union->lpz_phi(++$b) } 'inc lpz_phi';
+	lives_ok { $union->lpz_z(++$c) } 'inc lpz_z';
 	lives_and { is $struct->lam(), $a } 'lam';
 	lives_and { is $struct->phi(), $b } 'phi';
 	lives_and { is $struct->z(), $c } 'z';
@@ -369,7 +429,11 @@ subtest 'PJ_LPZ' => sub {
 lives_and { $struct = 0; ok $struct = $union->xy } 'xy';
 subtest 'PJ_XY' => sub {
 	plan skip_all => "(xy failed)" unless $struct;
-	plan tests => 4;
+	plan tests => 4*2;
+	is $union->xy_x, $a, 'xy_x';
+	is $union->xy_y, $b, 'xy_y';
+	lives_ok { $union->xy_x(++$a) } 'inc xy_x';
+	lives_ok { $union->xy_y(++$b) } 'inc xy_y';
 	is eval '$struct->x', $a, 'x';
 	is eval '$struct->y', $b, 'y';
 	lives_ok { eval '$struct->x('.++$a.')' } 'inc x';
@@ -379,7 +443,11 @@ subtest 'PJ_XY' => sub {
 lives_and { $struct = 0; ok $struct = $union->uv } 'uv';
 subtest 'PJ_UV' => sub {
 	plan skip_all => "(uv failed)" unless $struct;
-	plan tests => 4;
+	plan tests => 4*2;
+	is $union->uv_u, $a, 'uv_u';
+	is $union->uv_v, $b, 'uv_v';
+	lives_ok { $union->uv_u(++$a) } 'inc uv_u';
+	lives_ok { $union->uv_v(++$b) } 'inc uv_v';
 	lives_and { is $struct->u(), $a } 'u';
 	lives_and { is $struct->v(), $b } 'v';
 	lives_ok { $struct->u(++$a) } 'inc u';
@@ -389,7 +457,11 @@ subtest 'PJ_UV' => sub {
 lives_and { $struct = 0; ok $struct = $union->lp } 'lp';
 subtest 'PJ_LP' => sub {
 	plan skip_all => "(lp failed)" unless $struct;
-	plan tests => 4;
+	plan tests => 4*2;
+	is $union->lp_lam, $a, 'lp_lam';
+	is $union->lp_phi, $b, 'lp_phi';
+	lives_ok { $union->lp_lam(++$a) } 'inc lp_lam';
+	lives_ok { $union->lp_phi(++$b) } 'inc lp_phi';
 	lives_and { is $struct->lam(), $a } 'lam';
 	lives_and { is $struct->phi(), $b } 'phi';
 	lives_ok { $struct->lam(++$a) } 'inc lam';
@@ -402,7 +474,7 @@ subtest 'vector' => sub {
 	plan tests => 3;
 	is_deeply $v, [$a, $b, $c, $d], 'v array';
 	lives_ok { $union->v([ ++$a, ++$b, ++$c, ++$d ]) } 'inc v';
-	is_deeply $union->v(), [25.5, -21.5, 77.5, -85.5], 'v array';
+	is_deeply $union->v(), [37.5, -9.5, 86.5, -82.5], 'v array';
 };
 
 

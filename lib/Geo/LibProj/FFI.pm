@@ -261,6 +261,57 @@ $ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
 	record_layout_1(qw{ double[4] v });
 	# First and foremost, it really is "just 4 numbers in a vector"
 	
+	# union members:
+	
+	sub xyzt_x   { shift->v(0, @_) }
+	sub xyzt_y   { shift->v(1, @_) }
+	sub xyzt_z   { shift->v(2, @_) }
+	sub xyzt_t   { shift->v(3, @_) }
+	
+	sub uvwt_u   { shift->v(0, @_) }
+	sub uvwt_v   { shift->v(1, @_) }
+	sub uvwt_w   { shift->v(2, @_) }
+	sub uvwt_t   { shift->v(3, @_) }
+	
+	sub lpzt_lam { shift->v(0, @_) }
+	sub lpzt_phi { shift->v(1, @_) }
+	sub lpzt_z   { shift->v(2, @_) }
+	sub lpzt_t   { shift->v(3, @_) }
+	
+	sub geod_s   { shift->v(0, @_) }
+	sub geod_a1  { shift->v(1, @_) }
+	sub geod_a2  { shift->v(2, @_) }
+	
+	sub opk_o    { shift->v(0, @_) }
+	sub opk_p    { shift->v(1, @_) }
+	sub opk_k    { shift->v(2, @_) }
+	
+	sub enu_e    { shift->v(0, @_) }
+	sub enu_n    { shift->v(1, @_) }
+	sub enu_u    { shift->v(2, @_) }
+	
+	sub xyz_x    { shift->v(0, @_) }
+	sub xyz_y    { shift->v(1, @_) }
+	sub xyz_z    { shift->v(2, @_) }
+	
+	sub uvw_u    { shift->v(0, @_) }
+	sub uvw_v    { shift->v(1, @_) }
+	sub uvw_w    { shift->v(2, @_) }
+	
+	sub lpz_lam  { shift->v(0, @_) }
+	sub lpz_phi  { shift->v(1, @_) }
+	sub lpz_z    { shift->v(2, @_) }
+	
+	sub xy_x     { shift->v(0, @_) }
+	sub xy_y     { shift->v(1, @_) }
+	
+	sub uv_u     { shift->v(0, @_) }
+	sub uv_v     { shift->v(1, @_) }
+	
+	sub lp_lam   { shift->v(0, @_) }
+	sub lp_phi   { shift->v(1, @_) }
+	
+	# legacy support:
 	sub _new {
 		my ($class, $values, @params) = @_;
 		warnings::warnif_at_level 'deprecated', 1, sprintf 'Creating %s values with new() is deprecated; use proj_coords() instead', caller =~ s/^.*://r;
@@ -520,7 +571,7 @@ __END__
 
 =head1 SYNOPSIS
 
- use Geo::LibProj::FFI qw(:all);
+ use Geo::LibProj::FFI 0.05 qw(:all);
  use Syntax::Keyword::Defer;
  
  my $ctx = proj_context_create()
@@ -536,7 +587,7 @@ __END__
  $b = proj_trans( $pj, PJ_FWD, $a );
  
  printf "Target: easting %.2f, northing %.2f\n",
-     $b->enu->e, $b->enu->n;
+     $b->enu_e, $b->enu_n;
 
 See also the example script F<eg/pj_obs_api_mini_demo.pl>
 in this distribution.
@@ -719,7 +770,7 @@ access in C would be.
 
 The method names are the combination of the names of the
 C<PJ_COORD> union member and the individual struct member,
-joined with the arrow operator. However, these methods will in
+joined with an underscore. However, these methods will in
 turn access the coordinate array by calling the C<v()>
 method with the array index as argument. This extra method
 call may cost performance if called in a tight loop.
@@ -733,45 +784,54 @@ than using the other named union/struct member methods.
  # Fast access to individual coordinate numbers:
  $x = $pj_coord->v(0);
  $y = $pj_coord->v(1);
-
-When
-working with L<Geo::LibProj::FFI>, members of S<C C<struct>>
-and C<union> types may be accessed B<for reading> by calling
-methods on these composites. For example, to output the
-S<X coordinate> of a C<PJ_COORD> value, you could simply
-do C<< print $coord->xyz->x(); >>. Please see the
-L<PROJ data type reference|https://proj.org/development/reference/datatypes.html>
-for further documentation.
-
-As of version 0.04 of this module, the interface I<for modifying>
-values of composite types from Perl is still evolving. Therefore,
-values of S<C C<struct>> and C<union> types are best treated as
-B<immutable> by Perl users. For the same reason, it is not
-recommended to try and create new values of such types using Perl
-constructors; instead, users should use PROJ functions to create
-such values wherever possible.
-
-Consider this code example to create
-and modify a C<PJ_COORD> value:
-
- # discouraged:
- # (not guaranteed to work in future versions)
- $coord = Geo::LibProj::FFI::PJ_COORD->new({
-     xy => { x => 12, y => 34 }
- });
- $coord->xyz->z( 100 );
  
- # recommended:
- $coord = proj_coord( 12, 34, 0, 0 );
- $vector = $coord->v;
- $vector->[2] = 100;
- $coord = proj_coord( @$vector );
+ # Access generic coordinates by named member methods:
+ ($u, $v)         = ( $c->uv_u,   $c->uv_v  );
+ ($u, $v, $w)     = ( $c->uvw_u,  $c->uvw_v,  $c->uvw_w  );
+ ($u, $v, $w, $t) = ( $c->uvwt_u, $c->uvwt_v, $c->uvwt_w, $c->uvwt_t );
+ 
+ # Access cartesian coordinates by named member methods:
+ ($x, $y)         = ( $c->xy_x,   $c->xy_y  );
+ ($x, $y, $z)     = ( $c->xyz_x,  $c->xyz_y,  $c->xyz_z  );
+ ($x, $y, $z, $t) = ( $c->xyzt_x, $c->xyzt_y, $c->xyzt_z, $c->xyzt_t );
+ 
+ # Access geodetic coordinates by named member methods:
+ ($lamda, $phi)         = ( $c->lp_lam,   $c->lp_phi  );
+ ($lamda, $phi, $z)     = ( $c->lpz_lam,  $c->lpz_phi,  $c->lpz_z  );
+ ($lamda, $phi, $z, $t) = ( $c->lpzt_lam, $c->lpzt_phi, $c->lpzt_z, $c->lpzt_t );
+ 
+ # Access ancillary data by named member methods:
+ ($s, $az_fwd, $az_rev) = ( $c->geod_s, $c->geod_a1, $c->geod_a2 );
+ ($omega, $phi, $kappa) = ( $c->opk_o, $c->opk_p, $c->opk_k );
+ ($east, $north, $up)   = ( $c->enu_e, $c->enu_n, $c->enu_u );
+
+Modifying C<PJ_COORD> values is possible. All methods shown
+above act as mutators if a new value is passed as an argument.
+In the case of C<v()>, you can pass either an array reference
+or two arguments representing the array index and the new
+value, respectively.
+
+ $c = proj_coord( 0, 0, 0, 0 );
+ $c->v( [12, 34, 56] );
+ $c->v(1, 78);
+ $c->xy_x(99);
+ say join ' ', $c->v->@*;  # 99 78 56 0
 
 Creating new C<PJ_COORD> values should only be done with the
 C<proj_coord()> function. Other ways to construct such values
 may exist, but these must be considered implementation details
 that are subject to change. The C<proj_coord()> function is
 the only supported way to create C<PJ_COORD> values.
+
+Before version 0.05 of L<Geo::LibProj::FFI>, C<PJ_COORD>
+method names were joined with the arrow operator instead of
+an underscore (C<< $c->xyz->x >> etc.). The old syntax is now
+discouraged, but there are no immediate plans to remove it.
+
+Data types other than C<PJ_COORD> are available as well.
+Please see the
+L<PROJ data type reference|https://proj.org/development/reference/datatypes.html>
+for further documentation.
 
 =head1 BUGS AND LIMITATIONS
 

@@ -25,8 +25,8 @@ lives_and { ok $p = proj_create_crs_to_crs($c, "EPSG:4326", "EPSG:25833", 0) } '
 
 lives_and { ok $a = proj_coord( 79, 12, 0, 0 ) } 'coord';
 lives_and { ok $a = proj_trans( $p, PJ_FWD(), $a ) } 'trans';
-lives_and { like $a->enu->e(), qr/^43612.\./ } 'easting';
-lives_and { like $a->enu->n(), qr/^877161.\./ } 'northing';
+lives_and { like $a->enu_e(), qr/^43612.\./ } 'easting';
+lives_and { like $a->enu_n(), qr/^877161.\./ } 'northing';
 
 
 # proj_trans_generic
