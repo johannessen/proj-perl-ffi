@@ -1,4 +1,4 @@
-use 5.012;
+use v5.14;
 use warnings;
 
 # ABSTRACT: Foreign function interface to PROJ coordinate transformation software
@@ -263,12 +263,14 @@ $ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
 	
 	sub _new {
 		my ($class, $values, @params) = @_;
+		warnings::warnif_at_level 'deprecated', 1, sprintf 'Creating %s values with new() is deprecated; use proj_coords() instead', caller =~ s/^.*://r;
 		$values //= {};
 		@params = map { $values->{$_} // 0 } @params;
 		return $class->new({ 'v' => \@params });
 	}
 	sub _set {
 		my ($self, $values, @params) = @_;
+		warnings::warnif_at_level 'deprecated', 2, 'Setting PJ_COORD union members is deprecated; use proj_coords() instead';
 		if (ref $values eq 'HASH') {
 			@params = map { $values->{$_} } @params;
 		}
@@ -373,8 +375,8 @@ $ffi->type('record(Geo::LibProj::FFI::PJ_PROJ_INFO)' => 'PJ_PROJ_INFO');
 	sub gridname { my $s = shift->gridname_NUL; $s =~ s/\0+$//; $s }
 	sub filename { my $s = shift->filename_NUL; $s =~ s/\0+$//; $s }
 	sub format   { my $s = shift->format_NUL;   $s =~ s/\0+$//; $s }
-	sub lowerleft  { Geo::LibProj::FFI::PJ_LP->new({ lam => $_[0]->left,  phi => $_[0]->lower }) }
-	sub upperright { Geo::LibProj::FFI::PJ_LP->new({ lam => $_[0]->right, phi => $_[0]->upper }) }
+	sub lowerleft  { Geo::LibProj::FFI::PJ_COORD->new({ v => [$_[0]->left,  $_[0]->lower] }) }
+	sub upperright { Geo::LibProj::FFI::PJ_COORD->new({ v => [$_[0]->right, $_[0]->upper] }) }
 }
 $ffi->type('record(Geo::LibProj::FFI::PJ_GRID_INFO)' => 'PJ_GRID_INFO');
 
@@ -749,9 +751,7 @@ recommended to try and create new values of such types using Perl
 constructors; instead, users should use PROJ functions to create
 such values wherever possible.
 
-That said, it is already now fully I<possible> to modify such
-values and to construct them using C<new()>; it's just not yet
-I<recommended> to do so. Consider this code example to create
+Consider this code example to create
 and modify a C<PJ_COORD> value:
 
  # discouraged:
@@ -766,6 +766,12 @@ and modify a C<PJ_COORD> value:
  $vector = $coord->v;
  $vector->[2] = 100;
  $coord = proj_coord( @$vector );
+
+Creating new C<PJ_COORD> values should only be done with the
+C<proj_coord()> function. Other ways to construct such values
+may exist, but these must be considered implementation details
+that are subject to change. The C<proj_coord()> function is
+the only supported way to create C<PJ_COORD> values.
 
 =head1 BUGS AND LIMITATIONS
 

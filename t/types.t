@@ -24,6 +24,7 @@ my ($a, $b, $c, $d, $v, $union, $struct);
 
 subtest 'PJ_LP new' => sub {
 	plan tests => 2*3 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_LP->new(); } 'empty';
 	lives_and { is $struct->lam(), 0 } 'lam empty';
 	lives_and { is $struct->phi(), 0 } 'phi empty';
@@ -39,6 +40,7 @@ subtest 'PJ_LP new' => sub {
 
 subtest 'PJ_XY new' => sub {
 	plan tests => 2*3 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_XY->new(); } 'new empty';
 	is eval '$struct->x', 0, 'x empty';
 	is eval '$struct->y', 0, 'y empty';
@@ -54,6 +56,7 @@ subtest 'PJ_XY new' => sub {
 
 subtest 'PJ_UV new' => sub {
 	plan tests => 2*3 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_UV->new(); } 'new empty';
 	lives_and { is $struct->u(), 0 } 'u empty';
 	lives_and { is $struct->v(), 0 } 'v empty';
@@ -69,6 +72,7 @@ subtest 'PJ_UV new' => sub {
 
 subtest 'PJ_LPZ new' => sub {
 	plan tests => 2*4 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_LPZ->new(); } 'new empty';
 	lives_and { is $struct->lam(), 0 } 'lam empty';
 	lives_and { is $struct->phi(), 0 } 'phi empty';
@@ -86,6 +90,7 @@ subtest 'PJ_LPZ new' => sub {
 
 subtest 'PJ_XYZ new' => sub {
 	plan tests => 2*4 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_XYZ->new(); } 'new empty';
 	is eval '$struct->x', 0, 'x empty';
 	is eval '$struct->y', 0, 'y empty';
@@ -103,6 +108,7 @@ subtest 'PJ_XYZ new' => sub {
 
 subtest 'PJ_UVW new' => sub {
 	plan tests => 2*4 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_UVW->new(); } 'new empty';
 	lives_and { is $struct->u(), 0 } 'u empty';
 	lives_and { is $struct->v(), 0 } 'v empty';
@@ -120,6 +126,7 @@ subtest 'PJ_UVW new' => sub {
 
 subtest 'PJ_LPZT new' => sub {
 	plan tests => 2*5 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_LPZT->new(); } 'new empty';
 	lives_and { is $struct->lam(), 0 } 'lam empty';
 	lives_and { is $struct->phi(), 0 } 'phi empty';
@@ -139,6 +146,7 @@ subtest 'PJ_LPZT new' => sub {
 
 subtest 'PJ_XYZT new' => sub {
 	plan tests => 2*5 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_XYZT->new(); } 'new empty';
 	is eval '$struct->x', 0, 'x empty';
 	is eval '$struct->y', 0, 'y empty';
@@ -158,6 +166,7 @@ subtest 'PJ_XYZT new' => sub {
 
 subtest 'PJ_UVWT new' => sub {
 	plan tests => 2*5 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_UVWT->new(); } 'new empty';
 	lives_and { is $struct->u(), 0 } 'u empty';
 	lives_and { is $struct->v(), 0 } 'v empty';
@@ -177,6 +186,7 @@ subtest 'PJ_UVWT new' => sub {
 
 subtest 'PJ_OPK new' => sub {
 	plan tests => 2*4 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_OPK->new(); } 'new empty';
 	lives_and { is $struct->o(), 0 } 'o empty';
 	lives_and { is $struct->p(), 0 } 'p empty';
@@ -194,6 +204,7 @@ subtest 'PJ_OPK new' => sub {
 
 subtest 'PJ_ENU new' => sub {
 	plan tests => 2*4 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_ENU->new(); } 'new empty';
 	lives_and { is $struct->e(), 0 } 'e empty';
 	lives_and { is $struct->n(), 0 } 'n empty';
@@ -211,6 +222,7 @@ subtest 'PJ_ENU new' => sub {
 
 subtest 'PJ_GEOD new' => sub {
 	plan tests => 2*4 + 4;
+	no warnings 'deprecated';
 	lives_and { $struct = 0; ok $struct = Geo::LibProj::FFI::PJ_GEOD->new(); } 'new empty';
 	is eval '$struct->s', 0, 's empty';
 	is eval '$struct->a1', 0, 'a1 empty';
