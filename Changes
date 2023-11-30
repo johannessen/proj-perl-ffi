@@ -1,5 +1,11 @@
 Revision history for Geo::LibProj::FFI
 
+0.0452  2023-11-30
+
+ - Internal change: The PJ_COORD implementation is now based on the vector
+   union member. This means the fastest way to access coordinates is now
+   via $c->v(...) instead of $c->xyzt->...
+
 0.04  2021-05-24
 
  - Add area of interest functions

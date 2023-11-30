@@ -6,7 +6,7 @@ package Geo::LibProj::FFI;
 
 
 use Alien::proj 1.07;
-use FFI::Platypus 1.00;
+use FFI::Platypus 1.50;
 use FFI::C 0.08;
 use Convert::Binary::C 0.04;
 
@@ -90,7 +90,7 @@ use Exporter::Easy (TAGS => [
 ]);
 
 my $ffi = FFI::Platypus->new(
-	api => 1,
+	api => 2,
 	lang => 'C',
 	lib => [Alien::proj->dynamic_libs],
 );
@@ -258,12 +258,14 @@ $ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
 	
 	package Geo::LibProj::FFI::PJ_COORD;
 	use FFI::Platypus::Record;
-	record_layout_1(qw{ double x double y double z double t });
+	record_layout_1(qw{ double[4] v });
+	# First and foremost, it really is "just 4 numbers in a vector"
+	
 	sub _new {
 		my ($class, $values, @params) = @_;
 		$values //= {};
 		@params = map { $values->{$_} // 0 } @params;
-		return $class->new({ 'x' => $params[0], 'y' => $params[1], 'z' => $params[2], 't' => $params[3] });
+		return $class->new({ 'v' => \@params });
 	}
 	sub _set {
 		my ($self, $values, @params) = @_;
@@ -277,14 +279,6 @@ $ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
 	}
 	
 	# union members:
-	sub v {  # First and foremost, it really is "just 4 numbers in a vector"
-		my ($self, $vector) = @_;
-		return [ $self->x(), $self->y(), $self->z(), $self->t() ] unless $vector;
-		$self->x($vector->[0] // 0);
-		$self->y($vector->[1] // 0);
-		$self->z($vector->[2] // 0);
-		$self->t($vector->[3] // 0);
-	}
 	sub xyzt { $_[1] ? $_[0]->_set($_[1], qw{ x   y   z  t }) : shift }
 	sub uvwt { $_[1] ? $_[0]->_set($_[1], qw{ u   v   w  t }) : Geo::LibProj::FFI::PJ_UVWT->_new(shift) }
 	sub lpzt { $_[1] ? $_[0]->_set($_[1], qw{ lam phi z  t }) : shift }
@@ -302,26 +296,31 @@ $ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
 	# PJ_UV* need their own package due to name collisions.
 	# The other types are implemented by the PJ_COORD package.
 	
-	sub lam { shift->x( @_ ) }
-	sub o   { shift->x( @_ ) }
-	sub e   { shift->x( @_ ) }
-	sub s   { shift->x( @_ ) }
+	sub x   { shift->v(0, @_) }
+	sub lam { shift->v(0, @_) }
+	sub o   { shift->v(0, @_) }
+	sub e   { shift->v(0, @_) }
+	sub s   { shift->v(0, @_) }
 	
-	sub phi { shift->y( @_ ) }
-	sub p   { shift->y( @_ ) }
-	sub n   { shift->y( @_ ) }
-	sub a1  { shift->y( @_ ) }
+	sub y   { shift->v(1, @_) }
+	sub phi { shift->v(1, @_) }
+	sub p   { shift->v(1, @_) }
+	sub n   { shift->v(1, @_) }
+	sub a1  { shift->v(1, @_) }
 	
-	sub k   { shift->z( @_ ) }
-	sub u   { shift->z( @_ ) }
-	sub a2  { shift->z( @_ ) }
+	sub z   { shift->v(2, @_) }
+	sub k   { shift->v(2, @_) }
+	sub u   { shift->v(2, @_) }
+	sub a2  { shift->v(2, @_) }
+	
+	sub t   { shift->v(3, @_) }
 	
 	package Geo::LibProj::FFI::PJ_UVWT;
 	sub _new { bless \$_[1], $_[0] }
-	sub u { ${shift()}->x( @_ ) }
-	sub v { ${shift()}->y( @_ ) }
-	sub w { ${shift()}->z( @_ ) }
-	sub t { ${shift()}->t( @_ ) }
+	sub u { ${shift()}->v( 0, @_ ) }
+	sub v { ${shift()}->v( 1, @_ ) }
+	sub w { ${shift()}->v( 2, @_ ) }
+	sub t { ${shift()}->v( 3, @_ ) }
 	
 }
 $ffi->type('record(Geo::LibProj::FFI::PJ_COORD)' => 'PJ_COORD');
@@ -705,7 +704,35 @@ Import all functions and constants by using the tag C<:all>.
 
 =head1 DATA TYPES
 
-The PROJ library uses numerous composite data types. When
+The PROJ library uses numerous composite data types to represent
+coordinate tuples. The primary coordinate type,
+L<C<PJ_COORD>|https://proj.org/en/9.3/development/reference/datatypes.html#c.PJ_COORD>,
+is a C union that gets passed by value. This construct is
+not well supported by L<FFI::Platypus>, which this module
+relies on to make the PROJ library API available in Perl.
+The workaround implemented here is to just use the array
+C<v> internally and only model the union semantics using
+object methods, which is slightly slower than direct member
+access in C would be.
+
+The method names are the combination of the names of the
+C<PJ_COORD> union member and the individual struct member,
+joined with the arrow operator. However, these methods will in
+turn access the coordinate array by calling the C<v()>
+method with the array index as argument. This extra method
+call may cost performance if called in a tight loop.
+So if speed is more important to you than readable code,
+you should consider just calling C<v()> directly rather
+than using the other named union/struct member methods.
+
+ $pj_coord = proj_coord( @coords );
+ @coords   = $pj_coord->v->@*;
+ 
+ # Fast access to individual coordinate numbers:
+ $x = $pj_coord->v(0);
+ $y = $pj_coord->v(1);
+
+When
 working with L<Geo::LibProj::FFI>, members of S<C C<struct>>
 and C<union> types may be accessed B<for reading> by calling
 methods on these composites. For example, to output the
