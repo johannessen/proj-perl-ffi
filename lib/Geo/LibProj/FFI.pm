@@ -572,7 +572,7 @@ __END__
 =head1 SYNOPSIS
 
  use Geo::LibProj::FFI 0.05 qw(:all);
- use Syntax::Keyword::Defer;
+ use Feature::Compat::Defer;
  
  my $ctx = proj_context_create()
      or die "Cannot create threading context";
@@ -595,7 +595,7 @@ in this distribution.
 =head1 DESCRIPTION
 
 This module is a foreign function interface to the
-L<PROJ|https://proj.org/> coordinate transformation library.
+L<PROJ|https://proj.org/> coordinate transformation / projection library.
 Please see the PROJ library's
 L<C function reference|https://proj.org/development/reference/functions.html>
 for further documentation. You should be able to use those

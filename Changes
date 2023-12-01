@@ -1,6 +1,6 @@
 Revision history for Geo::LibProj::FFI
 
-0.0455  2023-12-01
+0.05  2023-12-01
 
  - Add new PJ_COORD struct member accessors. Instead of calling $c->xyz->x(),
    you can now simply call $c->xyz_x(), which is faster and more likely to

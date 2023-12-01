@@ -29,8 +29,12 @@ Released versions of [Geo::LibProj::FFI][] may be installed via CPAN:
 To install a development version from this repository, run the following steps:
 
  1. `git clone https://github.com/johannessen/proj-perl-ffi && cd proj-perl-ffi`
- 1. `dzil build` (requires [Dist::Zilla][])
- 1. `cpanm <archive>.tar.gz`
+ 1. `cpanm Dist::Zilla::PluginBundle::Author::AJNN`
+ 1. `dzil install`
+
+This is a “Pure Perl” module, so you generally do not need
+Dist::Zilla to contribute patches. You can simply clone the
+repository and run the test suite using `prove` instead.
 
 [Geo::LibProj::FFI]: https://metacpan.org/release/Geo-LibProj-FFI
 [Dist::Zilla]: https://metacpan.org/release/Dist-Zilla
