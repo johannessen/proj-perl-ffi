@@ -5,12 +5,14 @@ use lib 'lib';
 
 use Test::More;
 use Test::Exception;
-use Test::Warnings qw(:all);
+use Test::Warnings 0.010 qw(warning :no_end_test);
+my $no_warnings;
+use if $no_warnings = $ENV{AUTHOR_TESTING} ? 1 : 0, 'Test::Warnings';
 
 # Error reporting and logging
 # https://proj.org/development/reference/functions.html#error-reporting
 
-plan tests => 2 + 8 + 6 + 4 + 1;
+plan tests => 2 + 8 + 6 + 4 + $no_warnings;
 
 use Geo::LibProj::FFI qw( :all );
 

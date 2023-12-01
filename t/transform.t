@@ -5,12 +5,13 @@ use lib 'lib';
 
 use Test::More;
 use Test::Exception;
-use Test::Warnings;
+my $no_warnings;
+use if $no_warnings = $ENV{AUTHOR_TESTING} ? 1 : 0, 'Test::Warnings';
 
 # Coordinate transformation
 # https://proj.org/development/reference/functions.html#coordinate-transformation
 
-plan tests => 2 + 4 + 3;
+plan tests => 2 + 4 + 2 + $no_warnings;
 
 use Geo::LibProj::FFI qw( :all );
 
