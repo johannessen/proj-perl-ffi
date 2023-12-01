@@ -47,7 +47,7 @@ lives_ok { proj_log_func(0, $id, sub {
 	warn "$app_data (lvl $log_level): $msg";
 }) } 'log_func';
 
-diag "testing expected failure ...";
+# testing expected failure
 lives_and {
 	proj_log_level(0, PJ_LOG_ERROR);
 	$w = ''; $w = warning { $e = proj_create(0, "+proj=tpers"); };

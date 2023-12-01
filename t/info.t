@@ -27,7 +27,7 @@ lives_and { ok $i->minor >= 0 } 'info minor';
 lives_and { ok $i->patch >= 0 } 'info patch';
 my $version = '';
 eval { $version = $i->major . '.' . $i->minor . '.' . $i->patch };
-diag "PROJ $version";
+diag "PROJ $version" if $ENV{AUTHOR_TESTING} || $ENV{AUTOMATED_TESTING};
 lives_and { like $i->release, qr/\b\Q$version\E\b/ } 'info release';
 lives_and { like $i->version, qr/^\Q$version\E\b/ } 'info version';
 lives_and { like $i->searchpath, qr#\bAlien-proj\b|/proj\b# } 'info searchpath';
