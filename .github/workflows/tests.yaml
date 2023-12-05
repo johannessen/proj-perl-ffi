@@ -1,0 +1,67 @@
+---
+name: Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    name: Build distribution on 5.36
+    runs-on: ubuntu-latest
+    container:
+      image: perldocker/perl-tester:5.36
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: Run unit tests
+        run: upgrade-perl-helpers && auto-build-and-test-dist
+        env:
+          AUTOMATED_TESTING: 1
+          NONINTERACTIVE_TESTING: 1
+          EXTENDED_TESTING: 1
+          RELEASE_TESTING: 1
+          AUTHOR_TESTING: 1
+          NO_NETWORK_TESTING: 1
+          BUILD_DIR: build_dir
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build_dir
+          path: build_dir
+          retention-days: 1
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        perl:
+          - "5.16"
+          - "5.28"
+          - "latest"
+      fail-fast: true
+    name: Perl ${{ matrix.perl }}
+    steps:
+      - name: Get distribution
+        uses: actions/download-artifact@v3
+        with:
+          name: build_dir
+          path: .
+      - name: Install Perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: ${{ matrix.perl }}
+          install-modules-with: cpm
+      - name: Test
+        run: prove -lr t
+        env:
+          AUTOMATED_TESTING: 1
+          NONINTERACTIVE_TESTING: 1
+          EXTENDED_TESTING: 1
+          RELEASE_TESTING: 1
+          AUTHOR_TESTING: 1
