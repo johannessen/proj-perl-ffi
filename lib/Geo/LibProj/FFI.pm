@@ -314,14 +314,14 @@ $ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
 	# legacy support:
 	sub _new {
 		my ($class, $values, @params) = @_;
-		warnings::warnif_at_level 'deprecated', 1, sprintf 'Creating %s values with new() is deprecated; use proj_coords() instead', caller =~ s/^.*://r;
+		warnings::warnif_at_level( 'deprecated', 1, sprintf 'Creating %s values with new() is deprecated; use proj_coords() instead', caller =~ s/^.*://r );
 		$values //= {};
 		@params = map { $values->{$_} // 0 } @params;
 		return $class->new({ 'v' => \@params });
 	}
 	sub _set {
 		my ($self, $values, @params) = @_;
-		warnings::warnif_at_level 'deprecated', 2, 'Setting PJ_COORD union members is deprecated; use proj_coords() instead';
+		warnings::warnif_at_level( 'deprecated', 2, 'Setting PJ_COORD union members is deprecated; use proj_coords() instead' );
 		if (ref $values eq 'HASH') {
 			@params = map { $values->{$_} } @params;
 		}
@@ -330,6 +330,7 @@ $ffi->custom_type( 'PJ_PRIME_MERIDIANS' => {
 		}
 		$self->v(\@params);
 	}
+	*warnings::warnif_at_level = sub { warnings::warnif(shift, pop) } if $^V lt v5.27;
 	
 	# union members:
 	sub xyzt { $_[1] ? $_[0]->_set($_[1], qw{ x   y   z  t }) : shift }

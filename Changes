@@ -1,5 +1,9 @@
 Revision history for Geo::LibProj::FFI
 
+0.06  2023-12-05
+
+ - Fix compatibility with Perl v5.26 and older. (GH #3)
+
 0.05  2023-12-01
 
  - Add new PJ_COORD struct member accessors. Instead of calling $c->xyz->x(),

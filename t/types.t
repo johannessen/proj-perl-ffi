@@ -15,6 +15,9 @@ plan tests => 13 + 13*2 + $no_warnings;
 
 use Geo::LibProj::FFI qw( :all );
 
+# warnings::warnif_at_level workaround
+$SIG{'__WARN__'} = sub { warn shift if (caller 3)[0] !~ /^Geo::LibProj::FFI\b/ } if $^V lt v5.28;
+
 
 my ($a, $b, $c, $d, $v, $union, $struct);
 
