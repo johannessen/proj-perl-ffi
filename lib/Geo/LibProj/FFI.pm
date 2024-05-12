@@ -860,6 +860,8 @@ please report any issues.
 
 =item * L<Geo::Proj4>
 
+=item * L<PDL::GIS::Proj>
+
 =item * PROJ C API Reference:
 L<Data types|https://proj.org/development/reference/datatypes.html>,
 L<Functions|https://proj.org/development/reference/functions.html>
