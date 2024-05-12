@@ -602,7 +602,14 @@ L<C function reference|https://proj.org/development/reference/functions.html>
 for further documentation. You should be able to use those
 S<C functions> as if they were Perl.
 
-This module is functional, but incomplete.
+This module was originally written for PROJ S<version 8>.
+It works with PROJ versions as old as 6.2.0, and up to and
+including the most recent version.
+
+L<Geo::LibProj::FFI> offers a large portion of the most commonly
+used PROJ functions, but more could be added.
+If you need a function that isn't yet available in this module,
+please open a GitHub issue with a description of your use case.
 
 =head1 FUNCTIONS
 
@@ -833,24 +840,6 @@ Data types other than C<PJ_COORD> are available as well.
 Please see the
 L<PROJ data type reference|https://proj.org/development/reference/datatypes.html>
 for further documentation.
-
-=head1 BUGS AND LIMITATIONS
-
-PROJ makes heavy use of S<C C<union>> pass-by-value, which is
-unsupported by L<FFI::Platypus>. In earlier versions of this module,
-the workaround for working with C<PJ_COORD> values was quite slow.
-This performance issue has been addressed as of S<version 0.03.>
-
-Some implementation details of the glue this module provides
-may change in future, for example to better match the API or to
-increase performance. Should you decide to
-use this module in production, it would be wise to watch the
-L<GitHub project|https://github.com/johannessen/proj-perl-ffi>
-for changes, at least until the version has reached 1.00.
-
-This module is designed to be used with PROJ S<version 8>.
-PROJ versions as far back as 6.2.0 should work as well;
-please report any issues.
 
 =head1 SEE ALSO
 
