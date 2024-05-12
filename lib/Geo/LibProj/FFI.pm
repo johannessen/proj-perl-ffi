@@ -602,14 +602,14 @@ L<C function reference|https://proj.org/development/reference/functions.html>
 for further documentation. You should be able to use those
 S<C functions> as if they were Perl.
 
+L<Geo::LibProj::FFI> offers a large portion of the most commonly
+used PROJ functions, but more could be added later.
+If you need a function that isn't yet available in this module,
+please open a GitHub issue with a description of your use case.
+
 This module was originally written for PROJ S<version 8>.
 It works with PROJ versions as old as 6.2.0, and up to and
 including the most recent version.
-
-L<Geo::LibProj::FFI> offers a large portion of the most commonly
-used PROJ functions, but more could be added.
-If you need a function that isn't yet available in this module,
-please open a GitHub issue with a description of your use case.
 
 =head1 FUNCTIONS
 
