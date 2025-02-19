@@ -849,7 +849,7 @@ for further documentation.
 
 =item * L<Geo::Proj4>
 
-=item * L<PDL::GIS::Proj>
+=item * L<PDL::Transform::Proj4>
 
 =item * PROJ C API Reference:
 L<Data types|https://proj.org/development/reference/datatypes.html>,
