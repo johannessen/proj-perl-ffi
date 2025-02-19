@@ -96,7 +96,7 @@ my $ffi = FFI::Platypus->new(
 );
 FFI::C->ffi($ffi);
 
-my $c = Convert::Binary::C->new;
+my $c = Convert::Binary::C->new(Alignment => 0);
 
 $ffi->load_custom_type('::StringPointer' => 'string_pointer');
 # string* should also work, but doesn't in $ffi->cast
